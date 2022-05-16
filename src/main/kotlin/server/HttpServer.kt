@@ -56,7 +56,7 @@ class HttpServer(
         var response: HttpResponse = client.request("https://api.telegram.org/bot$apiToken/getMe") {}
         println(response.bodyAsText())
         response = client.request("https://api.telegram.org/bot$apiToken/setWebhook") {
-            parameter("url", "https://localhost:80/finder/sendUpdate")
+            parameter("url", "https://13.53.187.21:80/finder/sendUpdate")
         }
         println(response.bodyAsText())
         response = client.request("https://api.telegram.org/bot$apiToken/getWebhookInfo")
