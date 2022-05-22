@@ -1,12 +1,7 @@
 import server.HttpServer
 
-suspend fun main(/*args: Array<String>*/) {
+suspend fun main() {
     val server = HttpServer()
-
     server.initialiseBot()
-//    server.startServer()
-//    val client = ClientsData(clientsId = "123", clientName = "Vasiliy")
-//    println(client)
-
-
+    server.startServer()
 }
