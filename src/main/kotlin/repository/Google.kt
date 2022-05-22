@@ -3,14 +3,18 @@ package repository
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import models.google.response.GoogleSearchResponse
 
 object Google{
     private val client: HttpClient = HttpClient(CIO)
     private const val url = "https://cse.google.com/cse/element/v1"
 
-    suspend fun findGoogle(requestText: String){
-        val googleResponse = client.prepareRequest(url) {
+    suspend fun findGoogle(requestText: String): String{
+        val googleResponse = client.request(url) {
             url.set {
                 parameters.append("q", requestText)
                 parameters.append("num", "1")
@@ -26,5 +30,30 @@ object Google{
                 parameters.append("callback", "google.search.cse.api13056")
             }
         }
+        return if (googleResponse.status == HttpStatusCode.OK) {
+                    val json = Json {
+                        this.ignoreUnknownKeys = true
+                    }
+                    val jsonText = convertToJson(googleResponse.bodyAsText())
+                    val googleResponseJson = json.decodeFromString<GoogleSearchResponse>(jsonText)
+                    if (googleResponseJson.results?.isNotEmpty() == true) {
+                        "${googleResponseJson.results[0].titleNoFormatting}\n" +
+                        "${googleResponseJson.results[0].url}\n" +
+                        "${googleResponseJson.results[0].contentNoFormatting}"
+                    } else if (googleResponseJson.results?.isEmpty() == true) {
+                        BotAnswer.CAN_NOT_FIND.answer
+                    } else {
+                        BotAnswer.ERROR_BY_GOOGLE.answer
+                    }
+                } else {
+                    println(googleResponse.status)
+                    BotAnswer.ERROR_BY_GOOGLE.answer
+                }
+    }
+
+    private fun convertToJson(source: String): String{
+        var result = source.substringAfter('(')
+        result = result.substringBeforeLast(')')
+        return result;
     }
 }

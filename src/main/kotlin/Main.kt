@@ -1,7 +1,8 @@
+import repository.Bot
 import server.HttpServer
 
 suspend fun main() {
     val server = HttpServer()
-    server.initialiseBot()
+    Bot.initialiseBot()
     server.startServer()
 }
